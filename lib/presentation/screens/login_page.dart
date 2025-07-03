@@ -1,10 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gamingworkdo_fe/main.dart';
 import 'package:gamingworkdo_fe/presentation/screens/signup_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/decription_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/scroll_to_top.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function(int)? onChangePage;
@@ -27,6 +29,21 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _saveTestAccount();
+  }
+
+  Future<void> _saveTestAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', 'test@gmail.com');
+    await prefs.setString('password', '12345');
+  }
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passController = TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
@@ -42,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                 "Welcome to gaming – where every login is a new adventure. Gear up, dive in, and conquer your quests. Your journey to greatness starts now!",
             onBack: () {
               if (widget.onChangePage != null) {
-                widget.onChangePage!(0);
+                widget.onChangePage!(2);
               }
             },
           ),
@@ -91,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                             ),
                             TextFormField(
+                              controller: emailController,
                               decoration: InputDecoration(
                                 hintText: "Email",
                                 border: OutlineInputBorder(),
@@ -116,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                             ),
                             TextFormField(
+                              controller: passController,
                               decoration: InputDecoration(
                                 hintText: "Password",
                                 border: OutlineInputBorder(),
@@ -208,7 +227,33 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   ),
                                 ),
-                                onPressed: () {},
+                                onPressed: () async {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  final email = prefs.getString('email');
+                                  final password = prefs.getString('password');
+
+                                  final inputEmail = emailController.text;
+                                  final inputPass = passController.text;
+
+                                  if (inputEmail == email &&
+                                      inputPass == password) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => MainPage(),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Sai email hoặc mật khẩu !!!',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                                 child: Text(
                                   "LOG IN",
                                   style: TextStyle(

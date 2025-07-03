@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
+import 'package:gamingworkdo_fe/services/product_service.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:scroll_loop_auto_scroll/scroll_loop_auto_scroll.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,36 +14,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final productList = [
-    {
-      "id": 1,
-      "name": "Nintendo Switch Lite Turquoise",
-      "image": "assets/imgs/product1_switch.png",
-      "discount": "37%",
-      "cond": "New",
-      "price": "543.00",
-      "oldPrice": "700.00",
-      "dropDown": ["Blue", "White", "Grey"],
-    },
-    {
-      "id": 2,
-      "name": "Rubber Keycaps",
-      "image": "assets/imgs/product2_keyboard.png",
-      "discount": "25%",
-      "price": "499.00",
-      "oldPrice": "669.00",
-      "dropDown": ["Green", "Red"],
-    },
-    {
-      "id": 3,
-      "name": "Alen Ware Monitor T46",
-      "image": "assets/imgs/product3_monitor.png",
-      "discount": "30%",
-      "price": "470.00",
-      "oldPrice": "650.00",
-      "dropDown": ["28 inch", "32 inch"],
-    },
-  ];
+  late Future<List<dynamic>> lstProducts;
+  Map<int, String> selectedDropdown = {}; // Dùng cho Dropdown
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    lstProducts = ProductService.getAllProducts();
+  }
 
   int currentProductIndex = 0;
 
@@ -51,8 +34,6 @@ class _HomePageState extends State<HomePage> {
     _pageController.dispose();
     super.dispose();
   }
-
-  Map<int, String> selectedColors = {};
 
   @override
   Widget build(BuildContext context) {
@@ -317,58 +298,118 @@ class _HomePageState extends State<HomePage> {
 
                   //Products list
                   SizedBox(
-                    height: 600,
-                    child: Column(
-                      children: [
-                        // Hiển thị sản phẩm hiện tại
-                        Expanded(
-                          child: PageView.builder(
-                            controller: _pageController,
-                            itemCount: productList.length,
-                            onPageChanged: (index) {
-                              setState(() {
-                                currentProductIndex = index;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              return _productItem(productList[index]);
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        // Hàng dot chọn sản phẩm
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            productList.length,
-                            (index) => GestureDetector(
-                              onTap: () {
-                                _pageController.animateToPage(
-                                  index,
-                                  duration: Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              },
-                              child: AnimatedContainer(
-                                duration: Duration(milliseconds: 300),
-                                margin: EdgeInsets.symmetric(horizontal: 6),
-                                width: currentProductIndex == index ? 24 : 16,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: currentProductIndex == index
-                                      ? Colors.blueAccent
-                                      : Colors.grey.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(8),
+                    height: 700,
+                    child: FutureBuilder<List<dynamic>>(
+                      future: lstProducts,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Error: ${snapshot.error}'),
+                          );
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(
+                            child: Text('No products found.'),
+                          );
+                        }
+                        final lstProducts = snapshot.data!;
+                        final displayProducts = lstProducts
+                            .where(
+                              (item) =>
+                                  item != null && item is Map<String, dynamic>,
+                            )
+                            .take(10)
+                            .toList();
+
+                        if (displayProducts.isEmpty) {
+                          return const Center(
+                            child: Text('No valid products found.'),
+                          );
+                        }
+
+                        return Column(
+                          children: [
+                            SizedBox(
+                              height: 650,
+                              child: PageView.builder(
+                                controller: _pageController,
+                                itemCount: displayProducts.length,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    currentProductIndex = index;
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  final product = displayProducts[index];
+                                  return _productItem(product);
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                displayProducts.length,
+                                (index) => GestureDetector(
+                                  onTap: () {
+                                    _pageController.animateToPage(
+                                      index,
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: Duration(milliseconds: 300),
+                                    margin: EdgeInsets.symmetric(horizontal: 6),
+                                    width: currentProductIndex == index
+                                        ? 24
+                                        : 16,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: currentProductIndex == index
+                                          ? Colors.blueAccent
+                                          : Colors.grey.withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
               ),
+            ),
+          ),
+        ),
+
+        //Loop (Gaming)
+        SliverToBoxAdapter(
+          child: Container(
+            color: Colors.black,
+            child: Column(
+              children: [
+                ScrollLoopAutoScroll(
+                  child: Text(
+                    "Gaming Work Do",
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                  ),
+                  scrollDirection: Axis.horizontal,
+                  reverseScroll: true,
+                ),
+                SizedBox(height: 40),
+              ],
             ),
           ),
         ),
@@ -561,177 +602,209 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _productItem(Map<String, dynamic> product) {
-    int id = product["id"];
-    // List<String> selected = selectedColors[id] ?? product["dropDown"];
+    final int id = product["product_id"] ?? 0;
+    final List<dynamic> variants = product["product_variants"] ?? [];
+    if (variants.isEmpty) {
+      return Text("No variants found");
+    }
 
-    return Container(
-      height: 600,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.lightBlue.withOpacity(0.2), // Màu xanh
-            Colors.black.withOpacity(0.1), // Màu đen
-          ],
-          begin: Alignment.topCenter, // Điểm bắt đầu gradient
-          end: Alignment.bottomCenter, // Điểm kết thúc gradient
+    final dropdownItems = variants
+        .map<String>(
+          (v) =>
+              (v as Map<String, dynamic>)["attributes"]?["Inches"]
+                  ?.toString() ??
+              "Unknown",
+        )
+        .toSet()
+        .toList();
+
+    final variant = product['product_variants'][0];
+
+    final String? selectedValue =
+        (selectedDropdown[id] != null &&
+            dropdownItems.contains(selectedDropdown[id]))
+        ? selectedDropdown[id]
+        : (dropdownItems.isNotEmpty ? dropdownItems.first : null);
+
+    final selectedVariant = variants.firstWhere(
+      (v) =>
+          (v["attributes"]?["Inches"]?.toString() ?? "Unknown") ==
+          selectedValue,
+      orElse: () => variants[0],
+    );
+
+    final price = selectedVariant["variant_price"];
+
+    return TextButton(
+      onPressed: () {},
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.lightBlue.withOpacity(0.2),
+              Colors.black.withOpacity(0.1),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          border: Border.all(color: Colors.blue, width: 1),
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
         ),
-        border: Border.all(color: Colors.blue, width: 1),
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(15),
-          bottomLeft: Radius.circular(15),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            product["cond"] != null
-                ? _decriptionPro("${product["cond"]}")
-                : SizedBox(height: 20),
-            SizedBox(height: 10),
-            _decriptionPro("${product["discount"]}"),
-            SizedBox(height: 10),
-            Image.asset(
-              "${product["image"]}",
-              height: 300,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-            Text(
-              "${product["name"]}",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(FontAwesomeIcons.solidStar, color: Colors.white, size: 16),
-                SizedBox(width: 5),
-                Icon(FontAwesomeIcons.solidStar, color: Colors.white, size: 16),
-                SizedBox(width: 5),
-                Icon(FontAwesomeIcons.solidStar, color: Colors.white, size: 16),
-                SizedBox(width: 5),
-                Icon(
-                  FontAwesomeIcons.starHalfStroke,
-                  color: Colors.white,
-                  size: 16,
-                ),
-                SizedBox(width: 5),
-                Icon(FontAwesomeIcons.star, color: Colors.white, size: 16),
-              ],
-            ),
-            SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-              ),
-              value: selectedColors[id] ?? (product["dropDown"] as List).first,
-              items: (product["dropDown"] as List)
-                  .map<DropdownMenuItem<String>>(
-                    (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(item),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    "${product["categories"]?["category_name"] ?? ""} • ${product["brands"]?["brand_name"] ?? ""}",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  SizedBox(height: 10),
+                  Image.network(
+                    variant['product_image_main'],
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 220,
+                      color: Colors.grey[300],
+                      child: Center(child: Icon(Icons.broken_image)),
                     ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedColors[id] = value!;
-                });
-              },
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "\$${product["price"]}",
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Text(
+                "${product["product_name"]}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: List.generate(
+                  5,
+                  (index) => Padding(
+                    padding: const EdgeInsets.only(right: 5),
+                    child: Icon(
+                      index < 3
+                          ? FontAwesomeIcons.solidStar
+                          : (index == 3
+                                ? FontAwesomeIcons.starHalfStroke
+                                : FontAwesomeIcons.star),
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              if (dropdownItems.isNotEmpty && selectedValue != null)
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  value: selectedValue,
+                  items: dropdownItems
+                      .map(
+                        (item) =>
+                            DropdownMenuItem(value: item, child: Text(item)),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDropdown[id] = value!;
+                    });
+                  },
+                ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        "\$${price}",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[700],
+                      minimumSize: Size(80, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(15),
+                          bottomLeft: Radius.circular(15),
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      "ADD TO CART",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      "\$${product["oldPrice"]}",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[700],
-                    minimumSize: Size(100, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(15),
-                        bottomLeft: Radius.circular(15),
-                      ),
-                    ),
                   ),
-                  child: Text(
-                    "UNAVAILABLE",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-Widget _decriptionPro(title) {
-  return Container(
-    height: 20,
-    width: 40,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          Colors.lightBlue, // Màu xanh
-          Colors.black, // Màu đen
-        ],
-        begin: Alignment.centerLeft, // Điểm bắt đầu gradient
-        end: Alignment.centerRight, // Điểm kết thúc gradient
-      ),
-      borderRadius: BorderRadius.circular(5),
-    ),
-    child: Center(
-      child: Text(
-        "$title",
-        style: TextStyle(
-          fontSize: 12,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-  );
-}
+//   Widget _decriptionPro(title) {
+//     return Container(
+//       height: 20,
+//       width: 40,
+//       decoration: BoxDecoration(
+//         gradient: LinearGradient(
+//           colors: [
+//             Colors.lightBlue, // Màu xanh
+//             Colors.black, // Màu đen
+//           ],
+//           begin: Alignment.centerLeft, // Điểm bắt đầu gradient
+//           end: Alignment.centerRight, // Điểm kết thúc gradient
+//         ),
+//         borderRadius: BorderRadius.circular(5),
+//       ),
+//       child: Center(
+//         child: Text(
+//           "$title",
+//           style: TextStyle(
+//             fontSize: 12,
+//             color: Colors.white,
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

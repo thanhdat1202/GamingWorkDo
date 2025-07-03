@@ -1,10 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gamingworkdo_fe/presentation/screens/login.dart';
+import 'package:gamingworkdo_fe/presentation/screens/login_page.dart';
+import 'package:gamingworkdo_fe/presentation/screens/start_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/decription_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/scroll_to_top.dart';
+import 'package:gamingworkdo_fe/services/auth_service.dart';
 
 class SignupPage extends StatefulWidget {
   final void Function(int)? onChangePage;
@@ -15,6 +17,16 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final formKey = GlobalKey<FormState>();
+
+  //controller
+  final fullNameController = TextEditingController();
+  final phoneNumberController = TextEditingController();
+  final emailController = TextEditingController();
+  final passWordController = TextEditingController();
+
+  bool isLoading = false;
+  //
   int? selectedShareIndex;
 
   final ScrollController _scrollController = ScrollController();
@@ -23,6 +35,43 @@ class _SignupPageState extends State<SignupPage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void submit() async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    //Goi API
+    final thanhcong = await AuthService.signup(
+      fullName: fullNameController.text.trim(),
+      phoneNumber: phoneNumberController.text.trim(),
+      email: emailController.text.trim(),
+      pass: passWordController.text.trim(),
+    );
+
+    setState(() {
+      isLoading = false;
+    });
+
+    //ket qua
+    if (thanhcong) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Đăng ký thành công")));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => StartPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Đăng ký thất bại")));
+    }
   }
 
   @override
@@ -60,6 +109,7 @@ class _SignupPageState extends State<SignupPage> {
                       border: Border.all(color: Colors.grey, width: 1),
                     ),
                     child: Form(
+                      key: formKey,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 20,
@@ -70,7 +120,7 @@ class _SignupPageState extends State<SignupPage> {
                             Row(
                               children: [
                                 Text(
-                                  "First Name :",
+                                  "Full Name :",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -80,16 +130,19 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             SizedBox(height: 5),
                             TextFormField(
+                              controller: fullNameController,
                               decoration: InputDecoration(
-                                hintText: "First Name",
+                                hintText: "Full Name",
                                 border: OutlineInputBorder(),
                               ),
+                              validator: (value) =>
+                                  value!.isEmpty ? "Fill your full name" : null,
                             ),
                             SizedBox(height: 10),
                             Row(
                               children: [
                                 Text(
-                                  "Last Name :",
+                                  "Phone Number :",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -99,10 +152,14 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             SizedBox(height: 5),
                             TextFormField(
+                              controller: phoneNumberController,
                               decoration: InputDecoration(
-                                hintText: "Last Name",
+                                hintText: "Phone Number",
                                 border: OutlineInputBorder(),
                               ),
+                              validator: (value) => value!.isEmpty
+                                  ? "Fill your phone number"
+                                  : null,
                             ),
                             SizedBox(height: 10),
                             Row(
@@ -118,10 +175,26 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             SizedBox(height: 5),
                             TextFormField(
+                              controller: emailController,
                               decoration: InputDecoration(
                                 hintText: "Email",
                                 border: OutlineInputBorder(),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Fill your email";
+                                }
+
+                                // Biểu thức chính quy kiểm tra định dạng email
+                                final emailRegex = RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                );
+                                if (!emailRegex.hasMatch(value.trim())) {
+                                  return "Email không hợp lệ";
+                                }
+
+                                return null;
+                              },
                             ),
                             SizedBox(height: 10),
                             Row(
@@ -137,10 +210,22 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             SizedBox(height: 5),
                             TextFormField(
+                              controller: passWordController,
                               decoration: InputDecoration(
                                 hintText: "Password",
                                 border: OutlineInputBorder(),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Fill your password";
+                                }
+
+                                if (value.trim().length < 5) {
+                                  return "Password phải có ít nhất 5 ký tự";
+                                }
+
+                                return null;
+                              },
                             ),
 
                             //button Login
@@ -157,7 +242,7 @@ class _SignupPageState extends State<SignupPage> {
                                     ),
                                   ),
                                 ),
-                                onPressed: () {},
+                                onPressed: submit,
                                 child: Text(
                                   "CREATE AN ACCOUNT",
                                   style: TextStyle(

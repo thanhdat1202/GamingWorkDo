@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DecriptionPage extends StatelessWidget {
   final String title;
@@ -18,7 +18,7 @@ class DecriptionPage extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Container(
         width: double.infinity,
-        height: 220,
+        height: 200,
         decoration: BoxDecoration(color: Colors.black),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
@@ -26,26 +26,26 @@ class DecriptionPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  IconButton.outlined(
-                    iconSize: 16,
-                    color: Colors.white,
-                    style: ButtonStyle(
-                      side: MaterialStateProperty.all(
-                        BorderSide(color: Colors.white, width: 1),
-                      ),
-                    ),
-                    onPressed: onBack,
-                    icon: Icon(FontAwesomeIcons.arrowLeftLong),
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    "Back To Home",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     IconButton.outlined(
+              //       iconSize: 16,
+              //       color: Colors.white,
+              //       style: ButtonStyle(
+              //         side: MaterialStateProperty.all(
+              //           BorderSide(color: Colors.white, width: 1),
+              //         ),
+              //       ),
+              //       onPressed: onBack,
+              //       icon: Icon(FontAwesomeIcons.arrowLeftLong),
+              //     ),
+              //     SizedBox(width: 5),
+              //     Text(
+              //       "Back To Home",
+              //       style: TextStyle(fontSize: 16, color: Colors.white),
+              //     ),
+              //   ],
+              // ),
               Text(
                 "$title",
                 style: TextStyle(
