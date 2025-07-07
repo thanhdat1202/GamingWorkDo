@@ -5,6 +5,7 @@ import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/services/product_service.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:scroll_loop_auto_scroll/scroll_loop_auto_scroll.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,8 +16,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> lstProducts;
-  Map<int, String> selectedDropdown = {}; // Dùng cho Dropdown
+  Map<int, String> selectedDropdown = {}; // dropdown
   bool isLoading = true;
+
+  Set<int> wishlistIds = {};
+  List<Map<String, dynamic>> wishlistProducts = [];
 
   @override
   void initState() {
@@ -24,6 +28,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     lstProducts = ProductService.getAllProducts();
+
+    loadWishlist();
   }
 
   int currentProductIndex = 0;
@@ -35,12 +41,43 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  Future<void> saveWishlistIds(Set<int> wishlistIds) async {
+    final prefs = await SharedPreferences.getInstance();
+    final idsAsString = wishlistIds.map((id) => id.toString()).toList();
+    await prefs.setStringList('wishlist_ids', idsAsString);
+  }
+
+  Future<Set<int>> loadWishlistIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = prefs.getStringList('wishlist_ids') ?? [];
+    return ids.map((id) => int.tryParse(id) ?? 0).toSet();
+  }
+
+  Future<void> loadWishlist() async {
+    final ids = await loadWishlistIds();
+    final List<Map<String, dynamic>> products = [];
+
+    for (final id in ids) {
+      try {
+        final product = await ProductService.getProductById(id);
+        products.add(product);
+      } catch (e) {
+        print("Error loading product $id: $e");
+      }
+    }
+
+    setState(() {
+      wishlistIds = ids;
+      wishlistProducts = products;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
         // SliverAppBar
-        buildCustomAppBar(),
+        buildCustomAppBar(context),
 
         //body
         SliverToBoxAdapter(
@@ -505,7 +542,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
 
-        //About Us
+        //Story
         SliverToBoxAdapter(
           child: Container(
             height: 700,
@@ -595,9 +632,134 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
 
+        //about our shop
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 40),
+            child: Column(
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'About ',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Our ',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.lightBlueAccent,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Shop',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Gaming can help to improve cognitive skills such as problem-solving, memory, and attention.",
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                _aboutOurShopItem(
+                  "01",
+                  "Gift Boxes",
+                  "Finished products products and gift wrapping",
+                ),
+                SizedBox(height: 10),
+                _aboutOurShopItem(
+                  "02",
+                  "Promotions",
+                  "Large and frequent promotions with numerous discounts",
+                ),
+                SizedBox(height: 10),
+
+                _aboutOurShopItem(
+                  "03",
+                  "Shipping",
+                  "Free shipping on any order from \$ 150",
+                ),
+                SizedBox(height: 10),
+
+                _aboutOurShopItem(
+                  "04",
+                  "Quality",
+                  "All products are made by engineers and designers from India",
+                ),
+              ],
+            ),
+          ),
+        ),
+
         //Footer
         FooterWidget(),
       ],
+    );
+  }
+
+  //about our shop items
+  Widget _aboutOurShopItem(String stt, String title, String description) {
+    return Container(
+      height: 130,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.lightBlue.withOpacity(0.1),
+            Colors.white.withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: Colors.blue, width: 1),
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(15),
+          bottomLeft: Radius.circular(15),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "$stt",
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
+              ),
+            ),
+            Text(
+              "$title",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            Text(
+              "$description",
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -666,16 +828,59 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   SizedBox(height: 10),
-                  Image.network(
-                    variant['product_image_main'],
-                    height: 300,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 220,
-                      color: Colors.grey[300],
-                      child: Center(child: Icon(Icons.broken_image)),
-                    ),
+                  Stack(
+                    children: [
+                      Image.network(
+                        variant['product_image_main'],
+                        height: 300,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 220,
+                          color: Colors.grey[300],
+                          child: Center(child: Icon(Icons.broken_image)),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: IconButton(
+                          onPressed: () async {
+                            if (wishlistIds.contains(id)) {
+                              // Đã có => Xóa khỏi wishlist
+                              setState(() {
+                                wishlistIds.remove(id);
+                                wishlistProducts.removeWhere(
+                                  (p) => p["product_id"] == id,
+                                );
+                              });
+                            } else {
+                              // Thêm mới => Gọi API rồi thêm
+                              try {
+                                final product =
+                                    await ProductService.getProductById(id);
+                                setState(() {
+                                  wishlistIds.add(id);
+                                  wishlistProducts.add(product);
+                                });
+                              } catch (e) {
+                                print("Lỗi khi thêm sản phẩm vào wishlist: $e");
+                              }
+                            }
+                            await saveWishlistIds(wishlistIds);
+                          },
+                          icon: Icon(
+                            wishlistIds.contains(id)
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: wishlistIds.contains(id)
+                                ? Colors.red
+                                : Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

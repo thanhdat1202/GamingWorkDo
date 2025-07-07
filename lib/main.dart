@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamingworkdo_fe/presentation/screens/cart_page.dart';
+import 'package:gamingworkdo_fe/presentation/screens/detail_product.dart';
 import 'package:gamingworkdo_fe/presentation/screens/home_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/login_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/shop_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/signup_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/start_page.dart';
+import 'package:gamingworkdo_fe/presentation/screens/user_profile.dart';
 import 'package:gamingworkdo_fe/presentation/screens/wishlist_page.dart';
 
 void main() {
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: StartPage(),
+      home: MainPage(),
       routes: {
         '/home': (context) => const HomePage(),
         '/shop_page': (context) => const ShopPage(),

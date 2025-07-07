@@ -81,10 +81,11 @@ class _SignupPageState extends State<SignupPage> {
         controller: _scrollController,
         slivers: [
           // AppBar
-          buildCustomAppBar(),
+          buildCustomAppBar(context),
 
           //Decription Page
           DecriptionPage(
+            backTo: "",
             title: "Create Account",
             subtitle:
                 "Join the ultimate gaming community and unlock exclusive rewards. Register now and start your adventure!",

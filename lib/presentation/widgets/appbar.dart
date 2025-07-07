@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamingworkdo_fe/presentation/screens/user_profile.dart';
 
-SliverAppBar buildCustomAppBar() {
+SliverAppBar buildCustomAppBar(BuildContext context) {
   return SliverAppBar(
     automaticallyImplyLeading: false,
     floating: true,
@@ -20,6 +21,15 @@ SliverAppBar buildCustomAppBar() {
       IconButton(
         onPressed: () {},
         icon: Icon(FontAwesomeIcons.magnifyingGlass, color: Colors.white),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UserProfile()),
+          );
+        },
+        icon: Icon(FontAwesomeIcons.solidUser, color: Colors.white),
       ),
       IconButton(
         onPressed: () {},

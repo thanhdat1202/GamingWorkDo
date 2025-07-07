@@ -50,10 +50,11 @@ class _LoginPageState extends State<LoginPage> {
         controller: _scrollController, // Thêm dòng này!
         slivers: [
           // AppBar
-          buildCustomAppBar(),
+          buildCustomAppBar(context),
 
           //Decription Page
           DecriptionPage(
+            backTo: "",
             title: "Login",
             subtitle:
                 "Welcome to gaming – where every login is a new adventure. Gear up, dive in, and conquer your quests. Your journey to greatness starts now!",

@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 class ProductService {
   static Future<List<dynamic>> getAllProducts() async {
     final response = await http.get(
-      Uri.parse('$DOMAIN_API/products/get-all-products'),
+      Uri.parse("$DOMAIN_API/products/get-all-products"),
     );
     if (response.statusCode == 200) {
       final decoded = json.decode(response.body);
@@ -24,6 +24,19 @@ class ProductService {
       throw Exception('Unexpected response format');
     } else {
       throw Exception('Failed to load products');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getProductById(int id) async {
+    final response = await http.get(
+      Uri.parse("$DOMAIN_API/products/get-product-by-id/$id"),
+    );
+
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+      return body['data'];
+    } else {
+      throw Exception('Failed to load product');
     }
   }
 

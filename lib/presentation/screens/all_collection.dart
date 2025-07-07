@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:gamingworkdo_fe/presentation/screens/shop_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
-import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/services/product_service.dart';
 
 class AllCollectionPage extends StatefulWidget {
@@ -49,7 +47,7 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
     return CustomScrollView(
       slivers: [
         //appbar
-        buildCustomAppBar(),
+        buildCustomAppBar(context),
 
         SliverToBoxAdapter(
           child: Row(

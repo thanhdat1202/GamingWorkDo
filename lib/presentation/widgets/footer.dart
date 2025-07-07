@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamingworkdo_fe/presentation/screens/aboutus.dart';
 
 class FooterWidget extends StatefulWidget {
   const FooterWidget({super.key});
@@ -125,7 +126,14 @@ class _FooterWidgetState extends State<FooterWidget> {
                         "About Us",
                         style: TextStyle(color: Colors.white),
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AboutusPage(),
+                          ),
+                        );
+                      },
                     ),
                     ListTile(
                       title: Text(
