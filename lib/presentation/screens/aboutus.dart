@@ -16,7 +16,7 @@ class _AboutusPageState extends State<AboutusPage> {
       body: CustomScrollView(
         slivers: [
           //appbar
-          buildCustomAppBar(context),
+          buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
           //description page
           DecriptionPage(

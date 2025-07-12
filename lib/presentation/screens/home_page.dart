@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamingworkdo_fe/model/product_model.dart';
+import 'package:gamingworkdo_fe/presentation/screens/all_collection.dart';
+import 'package:gamingworkdo_fe/presentation/screens/detail_product.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
+import 'package:gamingworkdo_fe/presentation/widgets/menu.dart';
 import 'package:gamingworkdo_fe/services/product_service.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:scroll_loop_auto_scroll/scroll_loop_auto_scroll.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final void Function(int)? onChangePage;
+  const HomePage({super.key, this.onChangePage});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -72,148 +77,275 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        // SliverAppBar
-        buildCustomAppBar(context),
+    return Scaffold(
+      key: _scaffoldKey,
+      endDrawer: Menu(),
+      body: CustomScrollView(
+        slivers: [
+          // SliverAppBar
+          buildCustomAppBar(context, _scaffoldKey),
 
-        //body
-        SliverToBoxAdapter(
-          child: Container(
-            height: 350,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/imgs/background_home_ps.jpeg"),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.5),
-                  BlendMode.darken,
+          //body
+          SliverToBoxAdapter(
+            child: Container(
+              height: 350,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/imgs/background_home_ps.jpeg"),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.5),
+                    BlendMode.darken,
+                  ),
                 ),
               ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  height: 50,
-                  width: 310,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(63, 180, 234, 1),
-                            borderRadius: BorderRadius.circular(15),
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.blue, // Màu xanh
-                                Colors.black, // Màu đen
-                              ],
-                              begin:
-                                  Alignment.centerLeft, // Điểm bắt đầu gradient
-                              end: Alignment
-                                  .centerRight, // Điểm kết thúc gradient
-                            ),
-                          ),
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    height: 50,
+                    width: 310,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(63, 180, 234, 1),
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.blue, // Màu xanh
+                                  Colors.black, // Màu đen
+                                ],
+                                begin: Alignment
+                                    .centerLeft, // Điểm bắt đầu gradient
+                                end: Alignment
+                                    .centerRight, // Điểm kết thúc gradient
                               ),
-                              child: Text(
-                                "Featured",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                                child: Text(
+                                  "Featured",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        Text(
-                          "New Featured Collection",
-                          style: TextStyle(color: Colors.white, fontSize: 10),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 0,
-                            ), // Thêm padding ngang
-                            minimumSize: Size(
-                              0,
-                              0,
-                            ), // Đảm bảo không bị giới hạn bởi min width mặc định
-                            tapTargetSize: MaterialTapTargetSize
-                                .shrinkWrap, // Thu nhỏ vùng chạm
+                          Text(
+                            "New Featured Collection",
+                            style: TextStyle(color: Colors.white, fontSize: 10),
                           ),
-                          child: Text(
-                            "/ Gaming Collection",
-                            style: TextStyle(
-                              color: Colors.lightBlueAccent,
-                              fontSize: 10,
+                          TextButton(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 0,
+                              ), // Thêm padding ngang
+                              minimumSize: Size(
+                                0,
+                                0,
+                              ), // Đảm bảo không bị giới hạn bởi min width mặc định
+                              tapTargetSize: MaterialTapTargetSize
+                                  .shrinkWrap, // Thu nhỏ vùng chạm
                             ),
+                            child: Text(
+                              "/ Gaming Collection",
+                              style: TextStyle(
+                                color: Colors.lightBlueAccent,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Best ',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Pro Gaming ',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' Accessories',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
+                  Text(
+                    "Gaming accessories include gear such as headsets, extra controllers, charging  stations, memory devices, carrying cases  and much more.",
+                    style: TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextSpan(
-                        text: 'Best ',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[700],
+                          minimumSize: Size(120, 40),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              bottomRight: Radius.circular(25),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AllCollectionPage(),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Text(
+                              "SHOW PRODUCTS",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Icon(
+                              Symbols.stadia_controller,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ],
                         ),
                       ),
-                      TextSpan(
-                        text: 'Pro Gaming ',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
+                      SizedBox(width: 10),
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          minimumSize: Size(120, 40),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(30),
+                              bottomLeft: Radius.circular(30),
+                            ),
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: ' Accessories',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        onPressed: () {
+                          if (widget.onChangePage != null) {
+                            widget.onChangePage!(1);
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Text(
+                              "SHOW COLLECTIONS",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 10,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Icon(
+                              Symbols.stadia_controller,
+                              color: Colors.grey,
+                              size: 14,
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              // height: 850,
+              decoration: BoxDecoration(color: Colors.black),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 40,
                 ),
-                Text(
-                  "Gaming accessories include gear such as headsets, extra controllers, charging  stations, memory devices, carrying cases  and much more.",
-                  style: TextStyle(color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[700],
-                        minimumSize: Size(120, 40),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Best ',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.lightBlueAccent,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Seller ',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueAccent,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Of The Week',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        fixedSize: Size(160, 50),
+                        padding: EdgeInsets.symmetric(horizontal: 10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(25),
-                            bottomRight: Radius.circular(25),
+                            topLeft: Radius.circular(30),
+                            bottomRight: Radius.circular(30),
                           ),
                         ),
                       ),
@@ -222,492 +354,400 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Text(
                             "SHOW PRODUCTS",
-                            style: TextStyle(color: Colors.white, fontSize: 10),
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                           SizedBox(width: 10),
-                          Icon(
-                            Symbols.stadia_controller,
-                            color: Colors.white,
-                            size: 14,
-                          ),
+                          Icon(Symbols.stadia_controller, color: Colors.grey),
                         ],
                       ),
                     ),
-                    SizedBox(width: 10),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        minimumSize: Size(120, 40),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(30),
-                            bottomLeft: Radius.circular(30),
-                          ),
-                        ),
-                      ),
-                      onPressed: () {},
-                      child: Row(
-                        children: [
-                          Text(
-                            "SHOW COLLECTIONS",
-                            style: TextStyle(color: Colors.grey, fontSize: 10),
-                          ),
-                          SizedBox(width: 10),
-                          Icon(
-                            Symbols.stadia_controller,
-                            color: Colors.grey,
-                            size: 14,
-                          ),
-                        ],
+                    SizedBox(height: 30),
+
+                    //Products list
+                    SizedBox(
+                      height: 700,
+                      child: FutureBuilder<List<dynamic>>(
+                        future: lstProducts,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text('Error: ${snapshot.error}'),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text('No products found.'),
+                            );
+                          }
+                          final lstProducts = snapshot.data!;
+                          final displayProducts = lstProducts
+                              .where(
+                                (item) =>
+                                    item != null &&
+                                    item is Map<String, dynamic>,
+                              )
+                              .take(10)
+                              .toList();
+
+                          if (displayProducts.isEmpty) {
+                            return const Center(
+                              child: Text('No valid products found.'),
+                            );
+                          }
+
+                          return Column(
+                            children: [
+                              SizedBox(
+                                height: 650,
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  itemCount: displayProducts.length,
+                                  onPageChanged: (index) {
+                                    setState(() {
+                                      currentProductIndex = index;
+                                    });
+                                  },
+                                  itemBuilder: (context, index) {
+                                    final product = displayProducts[index];
+                                    return _productItem(product);
+                                  },
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  displayProducts.length,
+                                  (index) => GestureDetector(
+                                    onTap: () {
+                                      _pageController.animateToPage(
+                                        index,
+                                        duration: Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: Duration(milliseconds: 300),
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
+                                      width: currentProductIndex == index
+                                          ? 24
+                                          : 16,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: currentProductIndex == index
+                                            ? Colors.blueAccent
+                                            : Colors.grey.withOpacity(0.5),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Container(
-            // height: 850,
-            decoration: BoxDecoration(color: Colors.black),
+
+          //Loop (Gaming)
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.black,
+              child: Column(
+                children: [
+                  ScrollLoopAutoScroll(
+                    scrollDirection: Axis.horizontal,
+                    reverseScroll: true,
+                    child: Text(
+                      "Gaming Work Do",
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.deepPurpleAccent,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+
+          //Subscribe Us
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 10),
+              child: Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                  ),
+                  border: Border.all(width: 2, color: Colors.blue),
+                ),
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        minimumSize: Size(0, 30),
+                        padding: EdgeInsets.symmetric(horizontal: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Text(
+                        "Subscribe Us",
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "Subscribe newsletter and get -20% off",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "Almost three-quarters of dedicated PC gamers say their main motivation to upgrade is improving gaming experiences.",
+                      style: TextStyle(color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blueAccent),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Enter email address...',
+                                  hintStyle: TextStyle(fontSize: 14),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(5),
+                                  bottomRight: Radius.circular(5),
+                                ),
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  FontAwesomeIcons.paperPlane,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {},
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          //Story
+          SliverToBoxAdapter(
+            child: Container(
+              height: 700,
+              decoration: BoxDecoration(color: Colors.black),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 30,
+                  horizontal: 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[700],
+                        minimumSize: Size(0, 30),
+                        padding: EdgeInsets.symmetric(horizontal: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Text(
+                        "Here We Do",
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                    Text(
+                      "From Pixels To Play: Sharing Our Story",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "With hardware, tools are what enable a person to install, remove, or perform other actions on the components within their computer.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    SizedBox(height: 10),
+                    ...[
+                          "our gaming offerings cater to your every desire.",
+                          "forge lasting friendships with like-minded gamers who share your passion and enthusiasm.",
+                          "join us in fostering a vibrant and inclusive gaming culture that celebrates diversity and empowers players to connect, compete, and grow.",
+                        ]
+                        .map(
+                          (text) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  " *",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                    color: Colors.indigo,
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    text,
+                                    style: TextStyle(color: Colors.white),
+                                    softWrap: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    SizedBox(height: 20),
+                    Expanded(
+                      child: Container(
+                        height: 260,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(
+                            image: AssetImage("assets/imgs/img_aboutus.png"),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          //about our shop
+          SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 40),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: 'Best ',
+                          text: 'About ',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Our ',
+                          style: TextStyle(
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                             color: Colors.lightBlueAccent,
                           ),
                         ),
                         TextSpan(
-                          text: 'Seller ',
+                          text: 'Shop',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                             color: Colors.blueAccent,
                           ),
                         ),
-                        TextSpan(
-                          text: 'Of The Week',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
                       ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      fixedSize: Size(160, 50),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          bottomRight: Radius.circular(30),
-                        ),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: Row(
-                      children: [
-                        Text(
-                          "SHOW PRODUCTS",
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                        SizedBox(width: 10),
-                        Icon(Symbols.stadia_controller, color: Colors.grey),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 30),
-
-                  //Products list
-                  SizedBox(
-                    height: 700,
-                    child: FutureBuilder<List<dynamic>>(
-                      future: lstProducts,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Center(
-                            child: Text('Error: ${snapshot.error}'),
-                          );
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Center(
-                            child: Text('No products found.'),
-                          );
-                        }
-                        final lstProducts = snapshot.data!;
-                        final displayProducts = lstProducts
-                            .where(
-                              (item) =>
-                                  item != null && item is Map<String, dynamic>,
-                            )
-                            .take(10)
-                            .toList();
-
-                        if (displayProducts.isEmpty) {
-                          return const Center(
-                            child: Text('No valid products found.'),
-                          );
-                        }
-
-                        return Column(
-                          children: [
-                            SizedBox(
-                              height: 650,
-                              child: PageView.builder(
-                                controller: _pageController,
-                                itemCount: displayProducts.length,
-                                onPageChanged: (index) {
-                                  setState(() {
-                                    currentProductIndex = index;
-                                  });
-                                },
-                                itemBuilder: (context, index) {
-                                  final product = displayProducts[index];
-                                  return _productItem(product);
-                                },
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                displayProducts.length,
-                                (index) => GestureDetector(
-                                  onTap: () {
-                                    _pageController.animateToPage(
-                                      index,
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  },
-                                  child: AnimatedContainer(
-                                    duration: Duration(milliseconds: 300),
-                                    margin: EdgeInsets.symmetric(horizontal: 6),
-                                    width: currentProductIndex == index
-                                        ? 24
-                                        : 16,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: currentProductIndex == index
-                                          ? Colors.blueAccent
-                                          : Colors.grey.withOpacity(0.5),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        //Loop (Gaming)
-        SliverToBoxAdapter(
-          child: Container(
-            color: Colors.black,
-            child: Column(
-              children: [
-                ScrollLoopAutoScroll(
-                  child: Text(
-                    "Gaming Work Do",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                  ),
-                  scrollDirection: Axis.horizontal,
-                  reverseScroll: true,
-                ),
-                SizedBox(height: 40),
-              ],
-            ),
-          ),
-        ),
-
-        //Subscribe Us
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 10),
-            child: Container(
-              height: 300,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                ),
-                border: Border.all(width: 2, color: Colors.blue),
-              ),
-              child: Column(
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      minimumSize: Size(0, 30),
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Subscribe Us",
-                      style: TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Subscribe newsletter and get -20% off",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "Almost three-quarters of dedicated PC gamers say their main motivation to upgrade is improving gaming experiences.",
+                    "Gaming can help to improve cognitive skills such as problem-solving, memory, and attention.",
                     style: TextStyle(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 30),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blueAccent),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Enter email address...',
-                                hintStyle: TextStyle(fontSize: 14),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(5),
-                                bottomRight: Radius.circular(5),
-                              ),
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                FontAwesomeIcons.paperPlane,
-                                color: Colors.white,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        //Story
-        SliverToBoxAdapter(
-          child: Container(
-            height: 700,
-            decoration: BoxDecoration(color: Colors.black),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
-                      minimumSize: Size(0, 30),
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Here We Do",
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                  Text(
-                    "From Pixels To Play: Sharing Our Story",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "With hardware, tools are what enable a person to install, remove, or perform other actions on the components within their computer.",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 10),
-                  ...[
-                        "our gaming offerings cater to your every desire.",
-                        "forge lasting friendships with like-minded gamers who share your passion and enthusiasm.",
-                        "join us in fostering a vibrant and inclusive gaming culture that celebrates diversity and empowers players to connect, compete, and grow.",
-                      ]
-                      .map(
-                        (text) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                " *",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
-                                  color: Colors.indigo,
-                                ),
-                              ),
-                              SizedBox(width: 5),
-                              Expanded(
-                                child: Text(
-                                  text,
-                                  style: TextStyle(color: Colors.white),
-                                  softWrap: true,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList(),
                   SizedBox(height: 20),
-                  Expanded(
-                    child: Container(
-                      height: 260,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          image: AssetImage("assets/imgs/img_aboutus.png"),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
+                  _aboutOurShopItem(
+                    "01",
+                    "Gift Boxes",
+                    "Finished products products and gift wrapping",
+                  ),
+                  SizedBox(height: 10),
+                  _aboutOurShopItem(
+                    "02",
+                    "Promotions",
+                    "Large and frequent promotions with numerous discounts",
+                  ),
+                  SizedBox(height: 10),
+
+                  _aboutOurShopItem(
+                    "03",
+                    "Shipping",
+                    "Free shipping on any order from \$ 150",
+                  ),
+                  SizedBox(height: 10),
+
+                  _aboutOurShopItem(
+                    "04",
+                    "Quality",
+                    "All products are made by engineers and designers from India",
                   ),
                 ],
               ),
             ),
           ),
-        ),
 
-        //about our shop
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 40),
-            child: Column(
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'About ',
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'Our ',
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.lightBlueAccent,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'Shop',
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Gaming can help to improve cognitive skills such as problem-solving, memory, and attention.",
-                  style: TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                _aboutOurShopItem(
-                  "01",
-                  "Gift Boxes",
-                  "Finished products products and gift wrapping",
-                ),
-                SizedBox(height: 10),
-                _aboutOurShopItem(
-                  "02",
-                  "Promotions",
-                  "Large and frequent promotions with numerous discounts",
-                ),
-                SizedBox(height: 10),
-
-                _aboutOurShopItem(
-                  "03",
-                  "Shipping",
-                  "Free shipping on any order from \$ 150",
-                ),
-                SizedBox(height: 10),
-
-                _aboutOurShopItem(
-                  "04",
-                  "Quality",
-                  "All products are made by engineers and designers from India",
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        //Footer
-        FooterWidget(),
-      ],
+          //Footer
+          FooterWidget(),
+        ],
+      ),
     );
   }
 
@@ -798,7 +838,15 @@ class _HomePageState extends State<HomePage> {
     final price = selectedVariant["variant_price"];
 
     return TextButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                DetailProduct(product: ProductModel.fromJson(product)),
+          ),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -984,32 +1032,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-//   Widget _decriptionPro(title) {
-//     return Container(
-//       height: 20,
-//       width: 40,
-//       decoration: BoxDecoration(
-//         gradient: LinearGradient(
-//           colors: [
-//             Colors.lightBlue, // Màu xanh
-//             Colors.black, // Màu đen
-//           ],
-//           begin: Alignment.centerLeft, // Điểm bắt đầu gradient
-//           end: Alignment.centerRight, // Điểm kết thúc gradient
-//         ),
-//         borderRadius: BorderRadius.circular(5),
-//       ),
-//       child: Center(
-//         child: Text(
-//           "$title",
-//           style: TextStyle(
-//             fontSize: 12,
-//             color: Colors.white,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

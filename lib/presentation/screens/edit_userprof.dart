@@ -118,14 +118,14 @@ class _EditUserprofState extends State<EditUserprof> {
                   fullName: nameController.text.trim(),
                   email: emailController.text.trim(),
                   phoneNumber: phoneController.text.trim(),
-                  pass: widget.userModel.pass, // giữ nguyên mật khẩu nếu cần
+                  pass: widget.userModel.pass,
                 );
 
                 final success = await AuthService.updateUserProfile(
                   updatedUser,
                 );
                 if (success) {
-                  Navigator.pop(context);
+                  Navigator.pop(context, true);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text("Profile updated successfully!"),

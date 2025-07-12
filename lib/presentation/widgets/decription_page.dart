@@ -21,7 +21,7 @@ class DecriptionPage extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Container(
         width: double.infinity,
-        height: 250,
+        height: 252,
         decoration: BoxDecoration(
           color: Colors.black,
           border: Border(top: BorderSide(color: Colors.grey, width: 1)),

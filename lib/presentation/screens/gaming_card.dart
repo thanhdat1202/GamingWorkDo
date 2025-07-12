@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
+import 'package:gamingworkdo_fe/presentation/widgets/decription_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/services/product_service.dart';
 
-class AllCollectionPage extends StatefulWidget {
-  const AllCollectionPage({super.key});
+class GamingCard extends StatefulWidget {
+  const GamingCard({super.key});
 
   @override
-  State<AllCollectionPage> createState() => _AllCollectionPageState();
+  State<GamingCard> createState() => _GamingCardState();
 }
 
-class _AllCollectionPageState extends State<AllCollectionPage> {
+class _GamingCardState extends State<GamingCard> {
   late Future<List<dynamic>> lstProducts;
   List<dynamic> fullProductList = [];
   List<dynamic> visibleProductList = [];
@@ -21,17 +22,24 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
 
   Future<void> fetchProducts() async {
     try {
-      final products = await ProductService.getAllProducts();
+      final products = await ProductService.getProductsByIds([
+        15,
+        16,
+        17,
+        18,
+        19,
+      ]);
       setState(() {
         fullProductList = products;
-        visibleProductList = fullProductList.take(loadCount).toList();
+        visibleProductList =
+            products; // hoặc .take(loadCount).toList() nếu bạn muốn lazy load
         isLoading = false;
       });
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      print("Error fetching products: $e");
+      print("Error fetching selected products: $e");
     }
   }
 
@@ -48,104 +56,26 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          //appbar
           buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
-          SliverToBoxAdapter(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border(top: BorderSide(color: Colors.grey, width: 1)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  children: [
-                    IconButton.outlined(
-                      iconSize: 16,
-                      color: Colors.white,
-                      style: ButtonStyle(
-                        side: MaterialStateProperty.all(
-                          BorderSide(color: Colors.white, width: 1),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(FontAwesomeIcons.arrowLeftLong),
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      "Back To Shop",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          DecriptionPage(
+            title: "Game Cards",
+            subtitle:
+                "card game, game played for pleasure or gambling (or both) with one or more decks of playing cards. Games using playing cards exploit the fact that cards are individually identifiable from one side only, so that each player knows only the cards he holds and not those held by anyone else.",
+            backTo: "Back to shop",
+            onBack: () {
+              Navigator.pop(context);
+            },
           ),
 
-          //banner
-          SliverToBoxAdapter(
-            child: Image.asset("./assets/imgs/banner_allpro.png"),
-          ),
-
-          SliverToBoxAdapter(
-            child: isLoading
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(50),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: visibleProductList.length,
-                        itemBuilder: (context, index) {
-                          final product = visibleProductList[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 15,
-                            ),
-                            child: _productItem(product),
-                          );
-                        },
-                      ),
-                      if (visibleProductList.length < fullProductList.length)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: ElevatedButton(
-                            onPressed: loadMore,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[700],
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 15,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              "LOAD MORE",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+          //show products
+          SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: _productItem(visibleProductList[index]),
+              );
+            }, childCount: visibleProductList.length),
           ),
 
           //footer
@@ -153,13 +83,6 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
         ],
       ),
     );
-  }
-
-  void loadMore() {
-    final nextCount = visibleProductList.length + loadCount;
-    setState(() {
-      visibleProductList = fullProductList.take(nextCount).toList();
-    });
   }
 
   Widget _productItem(Map<String, dynamic> product) {

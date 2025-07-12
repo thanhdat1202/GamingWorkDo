@@ -80,7 +80,6 @@ class _UserProfileState extends State<UserProfile> {
                         TextButton(
                           onPressed: () async {
                             if (userModel != null) {
-                              // Chờ EditUserprof trả về kết quả (nếu có)
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -89,9 +88,8 @@ class _UserProfileState extends State<UserProfile> {
                                 ),
                               );
 
-                              // Nếu có cập nhật thành công → load lại user
                               if (result == true) {
-                                loadUser(); // gọi lại API fetchUserProfile()
+                                loadUser();
                               }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(

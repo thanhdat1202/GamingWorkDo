@@ -81,7 +81,7 @@ class _SignupPageState extends State<SignupPage> {
         controller: _scrollController,
         slivers: [
           // AppBar
-          buildCustomAppBar(context),
+          buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
           //Decription Page
           DecriptionPage(

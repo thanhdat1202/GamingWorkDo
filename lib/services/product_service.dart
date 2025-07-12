@@ -40,9 +40,18 @@ class ProductService {
     }
   }
 
-  //C
-
-  //U
-
-  //D
+  static Future<List<dynamic>> getProductsByIds(List<int> ids) async {
+    final response = await http.get(
+      Uri.parse(
+        "$DOMAIN_API/products/get-products-by-ids?ids=${ids.join(',')}",
+      ),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(data['data']);
+    } else {
+      throw Exception("Failed to fetch selected products");
+    }
+  }
 }

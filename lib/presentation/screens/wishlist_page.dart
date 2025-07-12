@@ -7,7 +7,8 @@ import 'package:gamingworkdo_fe/services/product_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WishlistPage extends StatefulWidget {
-  const WishlistPage({super.key});
+  final void Function(int)? onChangePage;
+  const WishlistPage({super.key, this.onChangePage});
 
   @override
   State<WishlistPage> createState() => _WishlistPageState();
@@ -66,7 +67,7 @@ class _WishlistPageState extends State<WishlistPage> {
     return CustomScrollView(
       slivers: [
         //appbar
-        buildCustomAppBar(context),
+        buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
         //desc
         DecriptionPage(
@@ -74,6 +75,11 @@ class _WishlistPageState extends State<WishlistPage> {
           title: "Wishlist",
           subtitle:
               "Discover epic games, exclusive gear, and must-have collectibles. Gear up for adventure with the ultimate wishlist experience! Add your favorites and be ready for the next big win!",
+          onBack: () {
+            if (widget.onChangePage != null) {
+              widget.onChangePage!(0);
+            }
+          },
         ),
 
         SliverToBoxAdapter(

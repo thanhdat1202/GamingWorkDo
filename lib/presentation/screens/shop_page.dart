@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:gamingworkdo_fe/presentation/screens/all_collection.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_card.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_chair.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_consoles.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_monitor.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_pc.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/decription_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 
 class ShopPage extends StatefulWidget {
-  const ShopPage({super.key});
+  final void Function(int)? onChangePage;
+  const ShopPage({super.key, this.onChangePage});
 
   @override
   State<ShopPage> createState() => _ShopPageState();
@@ -17,7 +23,7 @@ class _ShopPageState extends State<ShopPage> {
     return CustomScrollView(
       slivers: [
         //Appbar
-        buildCustomAppBar(context),
+        buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
         //decription page
         DecriptionPage(
@@ -25,19 +31,53 @@ class _ShopPageState extends State<ShopPage> {
           title: "Collections",
           subtitle:
               "Step into the future of gaming with our newest releases! Whether you're a fan of heart-pounding action, intricate strategy, or immersive storytelling, our collection has something for everyone.",
-          onBack: () {},
+          onBack: () {
+            if (widget.onChangePage != null) {
+              widget.onChangePage!(0);
+            }
+          },
         ),
         SliverToBoxAdapter(child: SizedBox(height: 20)),
 
         //all colecttion
         SliverList(
           delegate: SliverChildListDelegate([
-            shopItems("assets/imgs/all_collection.png", "All Collections"),
-            shopItems("assets/imgs/game_console.png", "Gaming Consoles"),
-            shopItems("assets/imgs/game_card.png", "Gaming Cards"),
-            shopItems("assets/imgs/game_chair.png", "Gaming Chairs"),
-            shopItems("assets/imgs/game_monitor.png", "Gaming Monitors"),
-            shopItems("assets/imgs/game_PC.png", "Gaming PCs"),
+            shopItems("assets/imgs/all_collection.png", "All Collections", () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AllCollectionPage()),
+              );
+            }),
+            shopItems("assets/imgs/game_console.png", "Game Consoles", () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GamingConsoles()),
+              );
+            }),
+            shopItems("assets/imgs/game_card.png", "Game Cards", () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GamingCard()),
+              );
+            }),
+            shopItems("assets/imgs/game_chair.png", "Game Chairs", () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GamingChair()),
+              );
+            }),
+            shopItems("assets/imgs/game_monitor.png", "Game Monitors", () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GamingMonitor()),
+              );
+            }),
+            shopItems("assets/imgs/game_PC.png", "Game PCs", () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GamingPc()),
+              );
+            }),
           ]),
         ),
 
@@ -48,16 +88,11 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-  Widget shopItems(String image, String title) {
+  Widget shopItems(String image, String title, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       child: TextButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AllCollectionPage()),
-          );
-        },
+        onPressed: onPressed,
         child: Stack(
           clipBehavior: Clip.none,
           children: [

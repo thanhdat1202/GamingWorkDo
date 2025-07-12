@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamingworkdo_fe/presentation/screens/user_profile.dart';
 
-SliverAppBar buildCustomAppBar(BuildContext context) {
+SliverAppBar buildCustomAppBar(
+  BuildContext context,
+  GlobalKey<ScaffoldState> scaffoldKey,
+) {
   return SliverAppBar(
     automaticallyImplyLeading: false,
     floating: true,
@@ -32,7 +35,9 @@ SliverAppBar buildCustomAppBar(BuildContext context) {
         icon: Icon(FontAwesomeIcons.solidUser, color: Colors.white),
       ),
       IconButton(
-        onPressed: () {},
+        onPressed: () {
+          scaffoldKey.currentState?.openEndDrawer();
+        },
         icon: Icon(FontAwesomeIcons.bars, color: Colors.white, size: 30),
       ),
     ],

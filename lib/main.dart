@@ -43,17 +43,28 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   var indexPage = 0;
   List<Widget> get lstPage => [
-    HomePage(),
-    ShopPage(),
-    WishlistPage(),
+    HomePage(
+      onChangePage: (int index) {
+        setState(() {
+          indexPage = index;
+        });
+      },
+    ),
+    ShopPage(
+      onChangePage: (int index) {
+        setState(() {
+          indexPage = index;
+        });
+      },
+    ),
+    WishlistPage(
+      onChangePage: (int index) {
+        setState(() {
+          indexPage = index;
+        });
+      },
+    ),
     CartPage(),
-    // LoginPage(
-    //   onChangePage: (int index) {
-    //     setState(() {
-    //       indexPage = index;
-    //     });
-    //   },
-    // ),
   ];
 
   @override

@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
         controller: _scrollController, // Thêm dòng này!
         slivers: [
           // AppBar
-          buildCustomAppBar(context),
+          buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
           //Decription Page
           DecriptionPage(
