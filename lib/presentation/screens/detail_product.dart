@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamingworkdo_fe/model/product_model.dart';
+import 'package:gamingworkdo_fe/presentation/screens/cart_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
+import 'package:gamingworkdo_fe/presentation/widgets/menu.dart';
+import 'package:gamingworkdo_fe/presentation/widgets/scroll_to_top.dart';
+import 'package:gamingworkdo_fe/services/cart_service.dart';
+import 'package:gamingworkdo_fe/services/product_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailProduct extends StatefulWidget {
   final ProductModel product;
@@ -18,21 +24,95 @@ class _DetailProductState extends State<DetailProduct> {
   late PageController _pageController;
   int _selectedIndex = 0;
 
+  int soluongSP = 1;
+
+  Set<int> wishlistIds = {};
+  List<Map<String, dynamic>> wishlistProducts = [];
+
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> saveWishlistIds(Set<int> wishlistIds) async {
+    final prefs = await SharedPreferences.getInstance();
+    final idsAsString = wishlistIds.map((id) => id.toString()).toList();
+    await prefs.setStringList('wishlist_ids', idsAsString);
+  }
+
+  Future<Set<int>> loadWishlistIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = prefs.getStringList('wishlist_ids') ?? [];
+    return ids.map((id) => int.tryParse(id) ?? 0).toSet();
+  }
+
+  Future<void> loadWishlist() async {
+    final ids = await loadWishlistIds();
+    final List<Map<String, dynamic>> products = [];
+
+    for (final id in ids) {
+      try {
+        final product = await ProductService.getProductById(id);
+        products.add(product);
+      } catch (e) {
+        print("Error loading product $id: $e");
+      }
+    }
+
+    setState(() {
+      wishlistIds = ids;
+      wishlistProducts = products;
+    });
+  }
+
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  List<Map<String, dynamic>> allProducts = [];
+  List<Map<String, dynamic>> filteredProducts = [];
+
+  Future<void> loadProducts() async {
+    final data = await ProductService.getAllProducts();
+    setState(() {
+      allProducts = List<Map<String, dynamic>>.from(data);
+      filteredProducts = List<Map<String, dynamic>>.from(data);
+    });
+  }
+
+  void _handleSearch(String keyword) {
+    final lowerKeyword = keyword.toLowerCase();
+    setState(() {
+      filteredProducts = allProducts.where((product) {
+        final name = product['product_name']?.toLowerCase() ?? '';
+        return name.contains(lowerKeyword);
+      }).toList();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     selectedVariant = widget.product.variants[0];
+    loadWishlist();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: Colors.black,
+      endDrawer: Menu(),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           //appbar
-          buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
+          AppbarWidget(
+            scaffoldKey: scaffoldKey,
+            onSearchChanged: _handleSearch,
+          ),
 
           //back to home
           SliverToBoxAdapter(
@@ -160,6 +240,7 @@ class _DetailProductState extends State<DetailProduct> {
                   ),
                   SizedBox(height: 20),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "\$${selectedVariant.variantPrice.toStringAsFixed(2)}",
@@ -177,11 +258,14 @@ class _DetailProductState extends State<DetailProduct> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
                               icon: Icon(Icons.remove, color: Colors.grey),
                               onPressed: () {
-                                // Trừ số lượng
+                                setState(() {
+                                  if (soluongSP > 1) soluongSP--;
+                                });
                               },
                               iconSize: 16,
                               padding: EdgeInsets.zero,
@@ -191,13 +275,21 @@ class _DetailProductState extends State<DetailProduct> {
                                 horizontal: 8,
                               ),
                               child: Text(
-                                '1',
-                                style: TextStyle(color: Colors.white),
+                                "$soluongSP",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             IconButton(
                               icon: Icon(Icons.add, color: Colors.grey),
-                              onPressed: () {},
+                              onPressed: () {
+                                setState(() {
+                                  soluongSP++;
+                                });
+                              },
                               iconSize: 16,
                               padding: EdgeInsets.zero,
                             ),
@@ -250,7 +342,7 @@ class _DetailProductState extends State<DetailProduct> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        width: 160,
+                        width: 50,
                         height: 50,
                         decoration: BoxDecoration(
                           color: Colors.blueAccent,
@@ -261,13 +353,10 @@ class _DetailProductState extends State<DetailProduct> {
                           ),
                         ),
                         child: Center(
-                          child: Text(
-                            "ADD TO CART",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Icon(
+                            Icons.favorite_border,
+                            size: 30,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -293,23 +382,44 @@ class _DetailProductState extends State<DetailProduct> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 30),
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent,
-                          border: Border.all(color: Colors.blue, width: 1),
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(10),
-                            bottomLeft: Radius.circular(10),
+                      TextButton(
+                        onPressed: () async {
+                          final productData = widget.product.toJson();
+                          await CartService.addToCart(
+                            productData,
+                            selectedVariant,
+                            soluongSP,
+                          );
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Product added to cart")),
+                          );
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => CartPage()),
+                          );
+                        },
+                        child: Container(
+                          width: 160,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent,
+                            border: Border.all(color: Colors.blue, width: 1),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(10),
+                              bottomLeft: Radius.circular(10),
+                            ),
                           ),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.favorite_border,
-                            size: 30,
-                            color: Colors.white,
+                          child: Center(
+                            child: Text(
+                              "ADD TO CART",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -400,6 +510,7 @@ class _DetailProductState extends State<DetailProduct> {
           FooterWidget(),
         ],
       ),
+      floatingActionButton: ScrollToTop(controller: _scrollController),
     );
   }
 

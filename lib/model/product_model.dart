@@ -3,7 +3,7 @@ class ProductVariant {
   final String variantName;
   final double variantPrice;
   final String productImageMain;
-  final String productImageHover;
+  // final String productImageHover;
   final int rating;
   final Map<String, String> attributes;
 
@@ -12,7 +12,7 @@ class ProductVariant {
     required this.variantName,
     required this.variantPrice,
     required this.productImageMain,
-    required this.productImageHover,
+    // required this.productImageHover,
     required this.rating,
     required this.attributes,
   });
@@ -23,10 +23,22 @@ class ProductVariant {
       variantName: json['variant_name'],
       variantPrice: (json['variant_price'] as num).toDouble(),
       productImageMain: json['product_image_main'],
-      productImageHover: json['product_image_hover'],
+      // productImageHover: json['product_image_hover'],
       rating: json['rating'] ?? 0,
       attributes: Map<String, String>.from(json['attributes'] ?? {}),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'variant_id': variantId,
+      'variant_name': variantName,
+      'variant_price': variantPrice,
+      'product_image_main': productImageMain,
+      // 'product_image_hover': productImageHover,
+      'rating': rating,
+      'attributes': attributes,
+    };
   }
 }
 
@@ -61,5 +73,17 @@ class ProductModel {
           .map((v) => ProductVariant.fromJson(v))
           .toList(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'product_id': id,
+      'product_name': name,
+      'description': description,
+      'product_status': status,
+      'brands': {'brand_name': brandName},
+      'categories': {'category_name': categoryName},
+      'product_variants': variants.map((v) => v.toJson()).toList(),
+    };
   }
 }

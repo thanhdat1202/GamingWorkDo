@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gamingworkdo_fe/presentation/screens/login_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/start_page.dart';
-import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/decription_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/scroll_to_top.dart';
@@ -81,7 +80,7 @@ class _SignupPageState extends State<SignupPage> {
         controller: _scrollController,
         slivers: [
           // AppBar
-          buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
+          // buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
           //Decription Page
           DecriptionPage(

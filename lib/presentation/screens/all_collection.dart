@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamingworkdo_fe/model/product_model.dart';
+import 'package:gamingworkdo_fe/presentation/screens/detail_product.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
+import 'package:gamingworkdo_fe/presentation/widgets/menu.dart';
+import 'package:gamingworkdo_fe/presentation/widgets/scroll_to_top.dart';
 import 'package:gamingworkdo_fe/services/product_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AllCollectionPage extends StatefulWidget {
   const AllCollectionPage({super.key});
@@ -18,6 +23,13 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
   int loadCount = 5;
   Map<int, String> selectedDropdown = {};
   bool isLoading = true;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<void> fetchProducts() async {
     try {
@@ -35,21 +47,85 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
     }
   }
 
+  Set<int> wishlistIds = {};
+  List<Map<String, dynamic>> wishlistProducts = [];
+
+  Future<void> saveWishlistIds(Set<int> wishlistIds) async {
+    final prefs = await SharedPreferences.getInstance();
+    final idsAsString = wishlistIds.map((id) => id.toString()).toList();
+    await prefs.setStringList('wishlist_ids', idsAsString);
+  }
+
+  Future<Set<int>> loadWishlistIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = prefs.getStringList('wishlist_ids') ?? [];
+    return ids.map((id) => int.tryParse(id) ?? 0).toSet();
+  }
+
+  Future<void> loadWishlist() async {
+    final ids = await loadWishlistIds();
+    final List<Map<String, dynamic>> products = [];
+
+    for (final id in ids) {
+      try {
+        final product = await ProductService.getProductById(id);
+        products.add(product);
+      } catch (e) {
+        print("Error loading product $id: $e");
+      }
+    }
+
+    setState(() {
+      wishlistIds = ids;
+      wishlistProducts = products;
+    });
+  }
+
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  List<Map<String, dynamic>> allProducts = [];
+  List<Map<String, dynamic>> filteredProducts = [];
+
+  Future<void> loadProducts() async {
+    final data = await ProductService.getAllProducts();
+    setState(() {
+      allProducts = List<Map<String, dynamic>>.from(data);
+      filteredProducts = List<Map<String, dynamic>>.from(data);
+    });
+  }
+
+  void _handleSearch(String keyword) {
+    final lowerKeyword = keyword.toLowerCase();
+    setState(() {
+      filteredProducts = allProducts.where((product) {
+        final name = product['product_name']?.toLowerCase() ?? '';
+        return name.contains(lowerKeyword);
+      }).toList();
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
     fetchProducts();
+    loadWishlist();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
+      endDrawer: Menu(),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           //appbar
-          buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
+          AppbarWidget(
+            scaffoldKey: scaffoldKey,
+            onSearchChanged: _handleSearch,
+          ),
 
           SliverToBoxAdapter(
             child: Container(
@@ -91,7 +167,13 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
 
           //banner
           SliverToBoxAdapter(
-            child: Image.asset("./assets/imgs/banner_allpro.png"),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                border: Border.all(width: 3, color: Colors.blue),
+              ),
+              child: Image.asset("./assets/imgs/banner_allpro.png"),
+            ),
           ),
 
           SliverToBoxAdapter(
@@ -152,6 +234,7 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
           FooterWidget(),
         ],
       ),
+      floatingActionButton: ScrollToTop(controller: _scrollController),
     );
   }
 
@@ -176,6 +259,10 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
             return attrs["Inches"].toString();
           } else if (attrs != null && attrs["Color"] != null) {
             return attrs["Color"].toString();
+          } else if (attrs != null && attrs["Type"] != null) {
+            return attrs["Type"].toString();
+          } else if (attrs != null && attrs["GB"] != null) {
+            return attrs["GB"].toString();
           } else {
             return "Unknown";
           }
@@ -201,7 +288,15 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
     final price = selectedVariant["variant_price"];
 
     return TextButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                DetailProduct(product: ProductModel.fromJson(product)),
+          ),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -228,19 +323,62 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
                 children: [
                   Text(
                     "${product["categories"]?["category_name"] ?? ""} • ${product["brands"]?["brand_name"] ?? ""}",
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                    style: TextStyle(color: Colors.black, fontSize: 12),
                   ),
                   SizedBox(height: 10),
-                  Image.network(
-                    variant['product_image_main'],
-                    height: 300,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 220,
-                      color: Colors.grey[300],
-                      child: Center(child: Icon(Icons.broken_image)),
-                    ),
+                  Stack(
+                    children: [
+                      Image.network(
+                        variant['product_image_main'],
+                        height: 300,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 220,
+                          color: Colors.grey[300],
+                          child: Center(child: Icon(Icons.broken_image)),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: IconButton(
+                          onPressed: () async {
+                            if (wishlistIds.contains(id)) {
+                              // Đã có => Xóa khỏi wishlist
+                              setState(() {
+                                wishlistIds.remove(id);
+                                wishlistProducts.removeWhere(
+                                  (p) => p["product_id"] == id,
+                                );
+                              });
+                            } else {
+                              // Thêm mới => Gọi API rồi thêm
+                              try {
+                                final product =
+                                    await ProductService.getProductById(id);
+                                setState(() {
+                                  wishlistIds.add(id);
+                                  wishlistProducts.add(product);
+                                });
+                              } catch (e) {
+                                print("Lỗi khi thêm sản phẩm vào wishlist: $e");
+                              }
+                            }
+                            await saveWishlistIds(wishlistIds);
+                          },
+                          icon: Icon(
+                            wishlistIds.contains(id)
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: wishlistIds.contains(id)
+                                ? Colors.red
+                                : Colors.black,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

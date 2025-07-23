@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gamingworkdo_fe/main.dart';
 import 'package:gamingworkdo_fe/presentation/screens/signup_page.dart';
-import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/decription_page.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/scroll_to_top.dart';
@@ -50,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
         controller: _scrollController, // Thêm dòng này!
         slivers: [
           // AppBar
-          buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
+          // buildCustomAppBar(context, GlobalKey<ScaffoldState>()),
 
           //Decription Page
           DecriptionPage(

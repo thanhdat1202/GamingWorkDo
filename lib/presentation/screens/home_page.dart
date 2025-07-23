@@ -6,10 +6,13 @@ import 'package:gamingworkdo_fe/presentation/screens/detail_product.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/appbar.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/footer.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/menu.dart';
+import 'package:gamingworkdo_fe/presentation/widgets/scroll_to_top.dart';
 import 'package:gamingworkdo_fe/services/product_service.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:scroll_loop_auto_scroll/scroll_loop_auto_scroll.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gamingworkdo_fe/services/cart_service.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HomePage extends StatefulWidget {
   final void Function(int)? onChangePage;
@@ -21,28 +24,39 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> lstProducts;
-  Map<int, String> selectedDropdown = {}; // dropdown
+  Map<int, String> selectedDropdown = {};
   bool isLoading = true;
+  final ScrollController _scrollController = ScrollController();
 
   Set<int> wishlistIds = {};
   List<Map<String, dynamic>> wishlistProducts = [];
+
+  //youtube
+  late YoutubePlayerController _controllerYT;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
+    _controllerYT = YoutubePlayerController(
+      initialVideoId: 'FaTa-wJIWZ0',
+      flags: YoutubePlayerFlags(autoPlay: false, mute: false),
+    );
+
     lstProducts = ProductService.getAllProducts();
 
     loadWishlist();
   }
 
-  int currentProductIndex = 0;
+  int currentProductIndex = 5;
 
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(initialPage: 5);
   @override
   void dispose() {
+    _scrollController.dispose();
     _pageController.dispose();
+    _controllerYT.dispose();
     super.dispose();
   }
 
@@ -77,17 +91,42 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  List<Map<String, dynamic>> allProducts = [];
+  List<Map<String, dynamic>> filteredProducts = [];
+
+  Future<void> loadProducts() async {
+    final data = await ProductService.getAllProducts();
+    setState(() {
+      allProducts = List<Map<String, dynamic>>.from(data);
+      filteredProducts = List<Map<String, dynamic>>.from(data);
+    });
+  }
+
+  void _handleSearch(String keyword) {
+    final lowerKeyword = keyword.toLowerCase();
+    setState(() {
+      filteredProducts = allProducts.where((product) {
+        final name = product['product_name']?.toLowerCase() ?? '';
+        return name.contains(lowerKeyword);
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
+      key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // SliverAppBar
-          buildCustomAppBar(context, _scaffoldKey),
+          AppbarWidget(
+            scaffoldKey: scaffoldKey,
+            onSearchChanged: _handleSearch,
+          ),
 
           //body
           SliverToBoxAdapter(
@@ -467,20 +506,94 @@ class _HomePageState extends State<HomePage> {
               color: Colors.black,
               child: Column(
                 children: [
-                  ScrollLoopAutoScroll(
-                    scrollDirection: Axis.horizontal,
-                    reverseScroll: true,
-                    child: Text(
-                      "Gaming Work Do",
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.deepPurpleAccent,
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: ScrollLoopAutoScroll(
+                      scrollDirection: Axis.horizontal,
+                      reverseScroll: true,
+                      child: Text(
+                        "Gaming Work Do",
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.deepPurpleAccent,
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  Divider(),
                 ],
               ),
+            ),
+          ),
+
+          //youtube
+          SliverToBoxAdapter(
+            child: YoutubePlayerBuilder(
+              player: YoutubePlayer(
+                controller: _controllerYT,
+                showVideoProgressIndicator: true,
+              ),
+              builder: (context, player) {
+                return Container(
+                  color: Colors.black,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 40,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Video ",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.lightBlue,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "Game ",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[700],
+                                ),
+                              ),
+                              TextSpan(
+                                text: "Of the Week",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(10),
+                              bottomLeft: Radius.circular(10),
+                            ),
+                            border: Border.all(width: 2, color: Colors.blue),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: player,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 
@@ -748,6 +861,7 @@ class _HomePageState extends State<HomePage> {
           FooterWidget(),
         ],
       ),
+      floatingActionButton: ScrollToTop(controller: _scrollController),
     );
   }
 
@@ -811,12 +925,20 @@ class _HomePageState extends State<HomePage> {
     }
 
     final dropdownItems = variants
-        .map<String>(
-          (v) =>
-              (v as Map<String, dynamic>)["attributes"]?["Inches"]
-                  ?.toString() ??
-              "Unknown",
-        )
+        .map<String>((v) {
+          final attrs = v["attributes"];
+          if (attrs != null && attrs["Inches"] != null) {
+            return attrs["Inches"].toString();
+          } else if (attrs != null && attrs["Color"] != null) {
+            return attrs["Color"].toString();
+          } else if (attrs != null && attrs["Type"] != null) {
+            return attrs["Type"].toString();
+          } else if (attrs != null && attrs["GB"] != null) {
+            return attrs["GB"].toString();
+          } else {
+            return "Unknown";
+          }
+        })
         .toSet()
         .toList();
 
@@ -834,6 +956,8 @@ class _HomePageState extends State<HomePage> {
           selectedValue,
       orElse: () => variants[0],
     );
+
+    final rating = selectedVariant["rating"] ?? 0;
 
     final price = selectedVariant["variant_price"];
 
@@ -890,8 +1014,8 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       Positioned(
-                        top: 8,
-                        right: 8,
+                        bottom: 0,
+                        right: 0,
                         child: IconButton(
                           onPressed: () async {
                             if (wishlistIds.contains(id)) {
@@ -948,17 +1072,16 @@ class _HomePageState extends State<HomePage> {
                   (index) => Padding(
                     padding: const EdgeInsets.only(right: 5),
                     child: Icon(
-                      index < 3
+                      index < rating
                           ? FontAwesomeIcons.solidStar
-                          : (index == 3
-                                ? FontAwesomeIcons.starHalfStroke
-                                : FontAwesomeIcons.star),
+                          : FontAwesomeIcons.star,
                       color: Colors.white,
                       size: 16,
                     ),
                   ),
                 ),
               ),
+
               SizedBox(height: 10),
               if (dropdownItems.isNotEmpty && selectedValue != null)
                 DropdownButtonFormField<String>(
@@ -1003,7 +1126,29 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final selectedVariant = variants.firstWhere(
+                        (v) =>
+                            (v["attributes"]?["Inches"]?.toString() ??
+                                "Unknown") ==
+                            selectedValue,
+                        orElse: () => variants[0],
+                      );
+
+                      await CartService.addToCart(
+                        product,
+                        ProductVariant.fromJson(selectedVariant),
+                        1,
+                      );
+
+                      if (widget.onChangePage != null) {
+                        widget.onChangePage!(3);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Added to cart!')),
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[700],
                       minimumSize: Size(80, 50),
