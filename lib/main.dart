@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamingworkdo_fe/presentation/screens/splash_screen.dart';
 import 'package:gamingworkdo_fe/presentation/screens/cart_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/home_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/shop_page.dart';
@@ -20,7 +21,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       home: StartPage(),
+      initialRoute: '/splash',
       routes: {
+        '/splash': (context) => SplashScreen(),
         '/home': (context) => const HomePage(),
         '/shop_page': (context) => const ShopPage(),
         '/wishlist_page': (context) => const WishlistPage(),

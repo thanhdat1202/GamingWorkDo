@@ -106,6 +106,7 @@ class _DetailProductState extends State<DetailProduct> {
       backgroundColor: Colors.black,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         controller: _scrollController,
         slivers: [
           //appbar

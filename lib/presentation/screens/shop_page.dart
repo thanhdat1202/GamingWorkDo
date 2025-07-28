@@ -49,6 +49,7 @@ class _ShopPageState extends State<ShopPage> {
       key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         slivers: [
           //appbar
           AppbarWidget(

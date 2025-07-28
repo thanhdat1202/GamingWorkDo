@@ -113,6 +113,7 @@ class _GamingChairState extends State<GamingChair> {
       key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         slivers: [
           //appbar
           AppbarWidget(

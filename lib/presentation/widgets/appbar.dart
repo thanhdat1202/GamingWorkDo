@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamingworkdo_fe/main.dart';
 import 'package:gamingworkdo_fe/presentation/screens/cart_page.dart';
 import 'package:gamingworkdo_fe/presentation/screens/user_profile.dart';
 import 'package:gamingworkdo_fe/presentation/widgets/search_content.dart';
@@ -57,12 +58,20 @@ class _AppbarWidgetState extends State<AppbarWidget> {
       automaticallyImplyLeading: false,
       floating: true,
       snap: true,
-      title: Text(
-        "Gaming",
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+      title: TextButton(
+        onPressed: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => MainPage()),
+            (Route<dynamic> route) => false,
+          );
+        },
+        child: Text(
+          "Gaming",
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ),
       centerTitle: false,

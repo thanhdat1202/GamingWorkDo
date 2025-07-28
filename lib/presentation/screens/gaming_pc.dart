@@ -113,6 +113,7 @@ class _GamingPcState extends State<GamingPc> {
       key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         slivers: [
           //appbar
           AppbarWidget(

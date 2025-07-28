@@ -113,6 +113,7 @@ class _GamingConsolesState extends State<GamingConsoles> {
       key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         slivers: [
           //appbar
           AppbarWidget(

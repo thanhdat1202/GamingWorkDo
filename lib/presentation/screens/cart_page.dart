@@ -77,6 +77,7 @@ class _CartPageState extends State<CartPage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 160),
             child: CustomScrollView(
+              physics: ClampingScrollPhysics(),
               slivers: [
                 AppbarWidget(
                   scaffoldKey: scaffoldKey,

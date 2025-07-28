@@ -120,6 +120,7 @@ class _HomePageState extends State<HomePage> {
       key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         controller: _scrollController,
         slivers: [
           // SliverAppBar

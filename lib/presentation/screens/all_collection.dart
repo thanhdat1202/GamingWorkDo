@@ -119,6 +119,7 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
       key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         controller: _scrollController,
         slivers: [
           //appbar
@@ -168,11 +169,17 @@ class _AllCollectionPageState extends State<AllCollectionPage> {
           //banner
           SliverToBoxAdapter(
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border.all(width: 3, color: Colors.blue),
+              color: Colors.black,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: Border.all(width: 3, color: Colors.blue),
+                  ),
+                  child: Image.asset("./assets/imgs/banner_allpro.png"),
+                ),
               ),
-              child: Image.asset("./assets/imgs/banner_allpro.png"),
             ),
           ),
 

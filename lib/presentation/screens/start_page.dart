@@ -13,6 +13,8 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
+  bool _hiddenPass = true;
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +92,7 @@ class _StartPageState extends State<StartPage> {
                       vertical: 20,
                     ),
                     child: TextFormField(
+                      obscureText: _hiddenPass,
                       controller: passController,
                       decoration: InputDecoration(
                         icon: Icon(
@@ -103,6 +106,18 @@ class _StartPageState extends State<StartPage> {
                         ),
                         filled: true,
                         fillColor: Colors.white,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _hiddenPass = !_hiddenPass;
+                            });
+                          },
+                          icon: Icon(
+                            _hiddenPass
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                        ),
                       ),
                     ),
                   ),

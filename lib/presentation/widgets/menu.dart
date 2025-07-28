@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gamingworkdo_fe/presentation/screens/aboutus.dart';
+import 'package:gamingworkdo_fe/presentation/screens/all_collection.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_card.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_chair.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_consoles.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_monitor.dart';
+import 'package:gamingworkdo_fe/presentation/screens/gaming_pc.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -55,27 +62,62 @@ class _MenuState extends State<Menu> {
                           ListTile(
                             title: Text("Game Consoles"),
                             trailing: Icon(Icons.arrow_right, size: 30),
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GamingConsoles(),
+                                ),
+                              );
+                            },
                           ),
                           ListTile(
                             title: Text("Game Cards"),
                             trailing: Icon(Icons.arrow_right, size: 30),
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GamingCard(),
+                                ),
+                              );
+                            },
                           ),
                           ListTile(
                             title: Text("Game Chairs"),
                             trailing: Icon(Icons.arrow_right, size: 30),
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GamingChair(),
+                                ),
+                              );
+                            },
                           ),
                           ListTile(
                             title: Text("Game Monitors"),
                             trailing: Icon(Icons.arrow_right, size: 30),
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GamingMonitor(),
+                                ),
+                              );
+                            },
                           ),
                           ListTile(
                             title: Text("Game PCs"),
                             trailing: Icon(Icons.arrow_right, size: 30),
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GamingPc(),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -125,7 +167,7 @@ class _MenuState extends State<Menu> {
               ).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 title: Text(
-                  "Products",
+                  "Product",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 iconColor: Colors.black,
@@ -135,43 +177,50 @@ class _MenuState extends State<Menu> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: ListTile(
-                      title: Text("Game Consoles"),
+                      title: Text("All Product"),
                       trailing: Icon(Icons.arrow_right, size: 30),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AllCollectionPage(),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: ListTile(
-                      title: Text("Game Cards"),
-                      trailing: Icon(Icons.arrow_right, size: 30),
-                      onTap: () {},
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: ListTile(
-                      title: Text("Game Chairs"),
-                      trailing: Icon(Icons.arrow_right, size: 30),
-                      onTap: () {},
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: ListTile(
-                      title: Text("Game Monitors"),
-                      trailing: Icon(Icons.arrow_right, size: 30),
-                      onTap: () {},
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: ListTile(
-                      title: Text("Game PCs"),
-                      trailing: Icon(Icons.arrow_right, size: 30),
-                      onTap: () {},
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 10),
+                  //   child: ListTile(
+                  //     title: Text("Game Cards"),
+                  //     trailing: Icon(Icons.arrow_right, size: 30),
+                  //     onTap: () {},
+                  //   ),
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 10),
+                  //   child: ListTile(
+                  //     title: Text("Game Chairs"),
+                  //     trailing: Icon(Icons.arrow_right, size: 30),
+                  //     onTap: () {},
+                  //   ),
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 10),
+                  //   child: ListTile(
+                  //     title: Text("Game Monitors"),
+                  //     trailing: Icon(Icons.arrow_right, size: 30),
+                  //     onTap: () {},
+                  //   ),
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 10),
+                  //   child: ListTile(
+                  //     title: Text("Game PCs"),
+                  //     trailing: Icon(Icons.arrow_right, size: 30),
+                  //     onTap: () {},
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -193,21 +242,20 @@ class _MenuState extends State<Menu> {
                     child: ListTile(
                       title: Text("About Us"),
                       trailing: Icon(Icons.arrow_right, size: 30),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AboutusPage(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: ListTile(
                       title: Text("Contact with Us"),
-                      trailing: Icon(Icons.arrow_right, size: 30),
-                      onTap: () {},
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: ListTile(
-                      title: Text("Game Chairs"),
                       trailing: Icon(Icons.arrow_right, size: 30),
                       onTap: () {},
                     ),

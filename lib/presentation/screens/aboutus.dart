@@ -16,6 +16,7 @@ class _AboutusPageState extends State<AboutusPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         slivers: [
           //appbar
           AppbarWidget(scaffoldKey: scaffoldKey, onSearchChanged: (value) {}),

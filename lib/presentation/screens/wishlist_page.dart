@@ -92,6 +92,7 @@ class _WishlistPageState extends State<WishlistPage> {
       key: scaffoldKey,
       endDrawer: Menu(),
       body: CustomScrollView(
+        physics: ClampingScrollPhysics(),
         slivers: [
           //appbar
           AppbarWidget(
